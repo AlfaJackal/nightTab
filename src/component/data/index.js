@@ -21,8 +21,8 @@ const data = {};
 // Funktion zum Speichern der Einstellungen über die API
 data.set = async (key, data) => {
     try {
-        console.log('Speichern von Einstellungen:', { [key]: data });  // Debugging-Ausgabe
-        await fetch('http://localhost:3100/settings', {
+        console.log('Speichern von Einstellungen:', { [key]: data });
+        await fetch('http://nighttab:3100/settings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ [key]: data }),
@@ -37,9 +37,9 @@ data.set = async (key, data) => {
 // Funktion zum Laden der Einstellungen über die API
 data.get = async (key) => {
     try {
-        const response = await fetch('http://localhost:3100/settings');
-        const settings = await response.json();  // Hier wird das JSON korrekt verarbeitet
-        console.log('Erhaltene Einstellungen:', settings);  // Debugging-Ausgabe
+        const response = await fetch('http://nighttab:3100/settings');
+        const settings = await response.json();
+        console.log('Erhaltene Einstellungen:', settings);
         return settings[key] || null;
     } catch (error) {
         console.error('Fehler beim Laden der Einstellungen:', error);
