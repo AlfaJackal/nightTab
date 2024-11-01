@@ -16,10 +16,10 @@ RUN apk add --no-cache nodejs npm
 # Kopiere die gebauten Dateien in den Nginx-Webordner
 COPY --from=build-stage /app/dist/web /usr/share/nginx/html
 
-# Kopiere die API-Datei
+# Kopiere die API-Datei und installiere Abhängigkeiten (express und cors)
 COPY settings-api.js /app/settings-api.js
 WORKDIR /app
-RUN npm install express
+RUN npm install express cors
 
 # Exponiere die Ports für Nginx und die API
 EXPOSE 80 3000
