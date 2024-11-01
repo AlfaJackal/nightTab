@@ -1,0 +1,7 @@
+version: '3'
+services:
+  nighttab:
+    build:
+      context: https://github.com/AlfaJackal/nightTab.git
+    ports:
+      - "8080:80"
