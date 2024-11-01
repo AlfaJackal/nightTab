@@ -18,15 +18,28 @@ import { clearChildNode } from '../../utility/clearChildNode';
 
 const data = {};
 
-// Funktion zum Speichern der Einstellungen über die API
-data.set = (key, data) => {
-  window.localStorage.setItem(key, data);
+data.set = (key, value) => {
+    try {
+        console.log(`Speichern der Einstellung lokal: ${key} = ${value}`);
+        // Speichern des JSON-String in localStorage
+        window.localStorage.setItem(key, JSON.stringify(value));
+        console.log('Einstellungen wurden lokal gespeichert.');
+    } catch (error) {
+        console.error('Fehler beim lokalen Speichern der Einstellungen:', error);
+    }
+};
 
-
-// Funktion zum Laden der Einstellungen über die API
 data.get = (key) => {
-  return window.localStorage.getItem(key);
-
+    try {
+        // Abrufen und Parsen des JSON-Strings aus localStorage
+        const value = window.localStorage.getItem(key);
+        console.log(`Erhaltene Einstellung lokal: ${key} = ${value}`);
+        return value ? JSON.parse(value) : null;
+    } catch (error) {
+        console.error('Fehler beim lokalen Laden der Einstellungen:', error);
+        return null;
+    }
+};
 
 data.import = {
   state: {
