@@ -1,13 +1,11 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const cors = require('cors');
 
 const app = express();
-const PORT = 3100; // Neuer API-Port für den Container
+const PORT = 3100;
 const DATA_PATH = path.join(__dirname, 'data/settings.json');
 
-app.use(cors());
 app.use(express.json());
 
 // Endpunkt zum Abrufen der Einstellungen
@@ -16,7 +14,7 @@ app.get('/settings', (req, res) => {
         const settings = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
         res.json(settings);
     } else {
-        res.json({}); // Rückgabe leerer Einstellungen, falls keine Datei vorhanden ist
+        res.json({}); // Rückgabe eines leeren Objekts, wenn die Datei nicht existiert
     }
 });
 
