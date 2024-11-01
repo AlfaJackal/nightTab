@@ -18,12 +18,28 @@ import { clearChildNode } from '../../utility/clearChildNode';
 
 const data = {};
 
-data.set = (key, data) => {
-  window.localStorage.setItem(key, data);
+data.set = async (key, data) => {
+    try {
+        await fetch('http://localhost:3000/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ [key]: data }),
+        });
+        console.log('Einstellungen wurden gespeichert.');
+    } catch (error) {
+        console.error('Fehler beim Speichern der Einstellungen:', error);
+    }
 };
 
-data.get = (key) => {
-  return window.localStorage.getItem(key);
+data.get = async (key) => {
+    try {
+        const response = await fetch('http://localhost:3000/settings');
+        const settings = await response.json();
+        return settings[key] || null;
+    } catch (error) {
+        console.error('Fehler beim Laden der Einstellungen:', error);
+        return null;
+    }
 };
 
 data.import = {
