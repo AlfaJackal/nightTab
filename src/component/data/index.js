@@ -18,28 +18,44 @@ import { clearChildNode } from '../../utility/clearChildNode';
 
 const data = {};
 
-data.set = (key, value) => {
+data.set = async (key, value) => {
     try {
-        console.log(`Speichern der Einstellung lokal: ${key} = ${value}`);
-        // Speichern des JSON-String in localStorage
-        window.localStorage.setItem(key, JSON.stringify(value));
-        console.log('Einstellungen wurden lokal gespeichert.');
+        console.log(`Speichern der Einstellung auf dem Server: ${key} = ${value}`);
+        const currentSettings = await data.getAll();
+        currentSettings[key] = value;
+        await fetch('http://localhost:3100/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(currentSettings),
+        });
+        console.log('Einstellungen wurden in settings.json gespeichert.');
     } catch (error) {
-        console.error('Fehler beim lokalen Speichern der Einstellungen:', error);
+        console.error('Fehler beim Speichern der Einstellungen:', error);
     }
 };
 
-data.get = (key) => {
+data.get = async (key) => {
     try {
-        // Abrufen und Parsen des JSON-Strings aus localStorage
-        const value = window.localStorage.getItem(key);
-        console.log(`Erhaltene Einstellung lokal: ${key} = ${value}`);
-        return value ? JSON.parse(value) : null;
+        const settings = await data.getAll();
+        console.log(`Einstellung vom Server erhalten: ${key} = ${settings[key]}`);
+        return settings[key] || null;
     } catch (error) {
-        console.error('Fehler beim lokalen Laden der Einstellungen:', error);
+        console.error('Fehler beim Laden der Einstellungen:', error);
         return null;
     }
 };
+
+data.getAll = async () => {
+    try {
+        const response = await fetch('http://localhost:3100/settings');
+        const settings = await response.json();
+        return settings;
+    } catch (error) {
+        console.error('Fehler beim Abrufen aller Einstellungen:', error);
+        return {};
+    }
+};
+
 
 data.import = {
   state: {
