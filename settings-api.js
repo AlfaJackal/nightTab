@@ -1,13 +1,13 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const cors = require('cors');
 
 const app = express();
-const PORT = 3000; // API-Port für den Container
+const PORT = 3100; // Neuer API-Port für den Container
 const DATA_PATH = path.join(__dirname, 'data/settings.json');
-const cors = require('cors');
-app.use(cors());
 
+app.use(cors());
 app.use(express.json());
 
 // Endpunkt zum Abrufen der Einstellungen
