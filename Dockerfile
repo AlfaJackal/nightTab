@@ -1,24 +1,28 @@
 # Phase 1: Build
 FROM node:alpine as build-stage
 
-# Arbeitsverzeichnis für den Build
 WORKDIR /app
 
-# Repository klonen
-RUN apk add --no-cache git && \
-    git clone https://github.com/AlfaJackal/nightTab.git . 
-
-# Abhängigkeiten installieren und Projekt bauen
+# Repository-Inhalt kopieren und Abhängigkeiten installieren
+COPY . .
 RUN npm install && npm run build
 
-# Phase 2: Bereitstellung mit Nginx
+# Phase 2: Bereitstellung mit Nginx und API
 FROM nginx:alpine
 
-# Kopiere die gebauten Dateien aus /dist/web in den Nginx-Webordner
+# Installiere Node.js für die API
+RUN apk add --no-cache nodejs npm
+
+# Kopiere die gebauten Dateien in den Nginx-Webordner
 COPY --from=build-stage /app/dist/web /usr/share/nginx/html
 
-# Erstelle ein Verzeichnis für Benutzerdaten und Einstellungen
-RUN mkdir -p /usr/share/nginx/html/data
+# Kopiere die API-Datei
+COPY settings-api.js /app/settings-api.js
+WORKDIR /app
+RUN npm install express
 
-# Standard Nginx-Port
-EXPOSE 80
+# Exponiere die Ports für Nginx und die API
+EXPOSE 80 3000
+
+# Starten von Nginx und der API
+CMD ["sh", "-c", "nginx -g 'daemon off;' & node /app/settings-api.js"]
