@@ -1,7 +1,11 @@
 version: '3'
+
 services:
   nighttab:
     build:
-      context: https://github.com/AlfaJackal/nightTab.git
+      context: .
     ports:
-      - "8080:80"
+      - "8888:80"    # Port für den Webzugriff auf nightTab
+      - "3000:3000"  # Port für die interne API
+    volumes:
+      - ./data:/app/data  # Volume für persistente Einstellungen
