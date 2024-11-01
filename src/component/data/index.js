@@ -18,9 +18,10 @@ import { clearChildNode } from '../../utility/clearChildNode';
 
 const data = {};
 
+// Funktion zum Speichern der Einstellungen über die API
 data.set = async (key, data) => {
     try {
-        await fetch('http://localhost:3100/settings', {
+        await fetch('http://10.10.0.111:3100/settings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ [key]: data }),
@@ -31,9 +32,10 @@ data.set = async (key, data) => {
     }
 };
 
+// Funktion zum Laden der Einstellungen über die API
 data.get = async (key) => {
     try {
-        const response = await fetch('http://localhost:3100/settings');
+        const response = await fetch('http://10.10.0.111:3100/settings');
         const settings = await response.json();
         return settings[key] || null;
     } catch (error) {
