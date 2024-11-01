@@ -20,7 +20,7 @@ const data = {};
 
 data.set = async (key, data) => {
     try {
-        await fetch('http://localhost:3000/settings', {
+        await fetch('http://localhost:3100/settings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ [key]: data }),
@@ -33,7 +33,7 @@ data.set = async (key, data) => {
 
 data.get = async (key) => {
     try {
-        const response = await fetch('http://localhost:3000/settings');
+        const response = await fetch('http://localhost:3100/settings');
         const settings = await response.json();
         return settings[key] || null;
     } catch (error) {
