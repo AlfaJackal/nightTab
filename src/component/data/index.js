@@ -19,34 +19,13 @@ import { clearChildNode } from '../../utility/clearChildNode';
 const data = {};
 
 // Funktion zum Speichern der Einstellungen über die API
-data.set = async (key, data) => {
-    try {
-        console.log(`Speichern der Einstellung: ${key} = ${data}`);
-        await fetch('http://10.10.0.111:3100/settings', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ [key]: data }),
-        });
-        console.log('Einstellungen wurden erfolgreich gespeichert.');
-    } catch (error) {
-        console.error('Fehler beim Speichern der Einstellungen:', error);
-    }
-};
+data.set = (key, data) => {
+  window.localStorage.setItem(key, data);
 
 
 // Funktion zum Laden der Einstellungen über die API
-data.get = async (key) => {
-    try {
-        console.log(`Anfrage an API: ${key}`);
-        const response = await fetch('http://10.10.0.111:3100/settings');
-        const settings = await response.json();
-        console.log('Erhaltene Einstellungen von API:', settings);
-        return settings[key] || null;
-    } catch (error) {
-        console.error('Fehler beim Laden der Einstellungen:', error);
-        return null;
-    }
-};
+data.get = (key) => {
+  return window.localStorage.getItem(key);
 
 
 data.import = {
