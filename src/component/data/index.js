@@ -21,13 +21,13 @@ const data = {};
 // Funktion zum Speichern der Einstellungen über die API
 data.set = async (key, data) => {
     try {
-        console.log('Speichern von Einstellungen:', { [key]: data });
+        console.log(`Speichern der Einstellung: ${key} = ${data}`);
         await fetch('http://10.10.0.111:3100/settings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ [key]: data }),
         });
-        console.log('Einstellungen wurden gespeichert.');
+        console.log('Einstellungen wurden erfolgreich gespeichert.');
     } catch (error) {
         console.error('Fehler beim Speichern der Einstellungen:', error);
     }
@@ -37,9 +37,10 @@ data.set = async (key, data) => {
 // Funktion zum Laden der Einstellungen über die API
 data.get = async (key) => {
     try {
-        const response = await fetch('http://10.10.0.111:3100/settings'); // `await` stellt sicher, dass das Promise aufgelöst wird
-        const settings = await response.json();  // JSON-Daten nach dem Auflösen des Promises verarbeiten
-        console.log('Erhaltene Einstellungen:', settings);
+        console.log(`Anfrage an API: ${key}`);
+        const response = await fetch('http://10.10.0.111:3100/settings');
+        const settings = await response.json();
+        console.log('Erhaltene Einstellungen von API:', settings);
         return settings[key] || null;
     } catch (error) {
         console.error('Fehler beim Laden der Einstellungen:', error);
