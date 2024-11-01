@@ -22,7 +22,7 @@ WORKDIR /app
 RUN npm install express cors
 
 # Exponiere die Ports für Nginx und die API
-EXPOSE 80 3000
+EXPOSE 80 3100
 
 # Starten von Nginx und der API
 CMD ["sh", "-c", "nginx -g 'daemon off;' & node /app/settings-api.js"]
