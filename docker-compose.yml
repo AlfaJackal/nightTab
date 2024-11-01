@@ -6,6 +6,6 @@ services:
       context: .
     ports:
       - "8888:80"    # Port für den Webzugriff auf nightTab
-      - "3000:3000"  # Port für die interne API
+      - "3100:3100"  # Neuer Port für die API
     volumes:
       - ./data:/app/data  # Volume für persistente Einstellungen
