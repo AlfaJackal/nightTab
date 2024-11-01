@@ -5,6 +5,8 @@ const path = require('path');
 const app = express();
 const PORT = 3000; // API-Port für den Container
 const DATA_PATH = path.join(__dirname, 'data/settings.json');
+const cors = require('cors');
+app.use(cors());
 
 app.use(express.json());
 
