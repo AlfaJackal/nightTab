@@ -37,8 +37,8 @@ data.set = async (key, data) => {
 // Funktion zum Laden der Einstellungen über die API
 data.get = async (key) => {
     try {
-        const response = await fetch('http://10.10.0.111:3100/settings');
-        const settings = await response.json();
+        const response = await fetch('http://10.10.0.111:3100/settings'); // `await` stellt sicher, dass das Promise aufgelöst wird
+        const settings = await response.json();  // JSON-Daten nach dem Auflösen des Promises verarbeiten
         console.log('Erhaltene Einstellungen:', settings);
         return settings[key] || null;
     } catch (error) {
