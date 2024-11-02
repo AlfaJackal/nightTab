@@ -37,24 +37,6 @@ data.set = async (key, value) => {
     }
 };
 
-// Laden einer spezifischen Einstellung vom Server (via API)
-data.get = async (key) => {
-    try {
-        const settings = await data.getAll();
-        
-        if (settings && typeof settings === "object") {
-            console.log(`Einstellung vom Server erhalten: ${key} = ${settings[key]}`);
-            return settings[key] || null;
-        } else {
-            console.warn("Leere oder ungültige Einstellungen erhalten, Standardwert zurückgeben.");
-            return null;
-        }
-    } catch (error) {
-        console.error('Fehler beim Laden der Einstellungen vom Server:', error);
-        return null;
-    }
-};
-
 // Alle Einstellungen vom Server abrufen
 data.getAll = async () => {
     try {
@@ -80,6 +62,25 @@ data.getAll = async () => {
         return {};
     }
 };
+
+// Laden einer spezifischen Einstellung vom Server (via API)
+data.get = async (key) => {
+    try {
+        const settings = await data.getAll();
+        
+        if (settings && typeof settings === "object") {
+            console.log(`Einstellung vom Server erhalten: ${key} = ${settings[key]}`);
+            return settings[key] || null;
+        } else {
+            console.warn("Leere oder ungültige Einstellungen erhalten, Standardwert zurückgeben.");
+            return null;
+        }
+    } catch (error) {
+        console.error('Fehler beim Laden der Einstellungen vom Server:', error);
+        return null;
+    }
+};
+
 
 data.import = {
   state: {
