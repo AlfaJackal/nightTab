@@ -18,16 +18,52 @@ import { clearChildNode } from '../../utility/clearChildNode';
 
 const data = {};
 
-data.set = (key, value) => {
-    console.log(`Speichern der Einstellung in localStorage: ${key} = ${value}`);
-    window.localStorage.setItem(key, JSON.stringify(value));
+const data = {};
+
+// Speichern der Daten auf dem Server (via API)
+data.set = async (key, value) => {
+    try {
+        console.log(`Speichern der Einstellung auf dem Server: ${key} = ${value}`);
+        const currentSettings = await data.getAll();
+        currentSettings[key] = value;
+
+        // POST-Anfrage an die API, um die Daten zu speichern
+        await fetch('http://nighttab:3100/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(currentSettings),
+        });
+        console.log('Einstellungen wurden in settings.json auf dem Server gespeichert.');
+    } catch (error) {
+        console.error('Fehler beim Speichern der Einstellungen auf dem Server:', error);
+    }
 };
 
-data.get = (key) => {
-    const value = JSON.parse(window.localStorage.getItem(key));
-    console.log(`Laden der Einstellung von localStorage: ${key} = ${value}`);
-    return value;
+// Laden einer spezifischen Einstellung vom Server (via API)
+data.get = async (key) => {
+    try {
+        const settings = await data.getAll();
+        console.log(`Einstellung vom Server erhalten: ${key} = ${settings[key]}`);
+        return settings[key] || null;
+    } catch (error) {
+        console.error('Fehler beim Laden der Einstellungen vom Server:', error);
+        return null;
+    }
 };
+
+// Alle Einstellungen vom Server abrufen
+data.getAll = async () => {
+    try {
+        const response = await fetch('http://nighttab:3100/settings');
+        const settings = await response.json();
+        console.log('Alle Einstellungen vom Server erhalten:', settings);
+        return settings;
+    } catch (error) {
+        console.error('Fehler beim Abrufen aller Einstellungen vom Server:', error);
+        return {};
+    }
+};
+
 
 
 data.import = {
