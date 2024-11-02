@@ -18,6 +18,15 @@ import { clearChildNode } from '../../utility/clearChildNode';
 
 const data = {};
 
+// Standard-Settings-Objekt
+const defaultSettings = {
+    style: {
+        // Definieren Sie hier die Standardwerte für "style"
+    },
+    language: 'en', // Standardwert für die Sprache
+    // Fügen Sie weitere Standardwerte hier hinzu
+};
+
 // Speichern der Daten auf dem Server (via API)
 data.set = async (key, value) => {
     try {
@@ -43,41 +52,37 @@ data.set = async (key, value) => {
 // Laden einer spezifischen Einstellung vom Server (via API)
 data.get = async (key) => {
     try {
-        // Abrufen aller Einstellungen und sicherstellen, dass es kein Promise ist
         const settings = await data.getAll();
         console.log(`Einstellung vom Server erhalten: ${key} = ${settings[key]}`);
-        return settings[key] || null;
+        return settings[key] || defaultSettings[key] || null;
     } catch (error) {
         console.error('Fehler beim Laden der Einstellungen vom Server:', error);
-        return null;
+        return defaultSettings[key] || null;
     }
 };
 
-// Alle Einstellungen vom Server abrufen
+// Alle Einstellungen vom Server abrufen und mit Standardwerten kombinieren
 data.getAll = async () => {
     try {
         const response = await fetch('http://10.10.0.111:3100/settings');
         
-        // Prüfen, ob die Antwort erfolgreich ist
         if (!response.ok) {
             console.warn("Fehlerhafte Antwort vom Server:", response.status);
-            return {};
+            return { ...defaultSettings };
         }
 
-        // JSON-Antwort abrufen und sicherstellen, dass sie kein Promise ist
         const settings = await response.json();
 
-        // Sicherstellen, dass die Antwort ein gültiges Objekt ist
         if (settings && typeof settings === "object" && !Array.isArray(settings)) {
             console.log('Alle Einstellungen vom Server erhalten (gültiges JSON):', settings);
-            return settings;
+            return { ...defaultSettings, ...settings };
         } else {
-            console.warn("Ungültige JSON-Struktur erhalten, Rückgabe eines leeren Objekts.");
-            return {};
+            console.warn("Ungültige JSON-Struktur erhalten, Rückgabe der Standardwerte.");
+            return { ...defaultSettings };
         }
     } catch (error) {
         console.error('Fehler beim Abrufen aller Einstellungen vom Server:', error);
-        return {};
+        return { ...defaultSettings };
     }
 };
 
@@ -89,11 +94,8 @@ data.import = {
   },
   reset: () => {
     data.import.state.setup.include = true;
-
     data.import.state.bookmark.include = true;
-
     data.import.state.bookmark.type = 'restore';
-
     data.import.state.theme.include = true;
   },
   file: ({
@@ -153,17 +155,13 @@ data.import = {
 
           if (dataToRestore.version !== version.number) {
             data.backup(dataToRestore);
-
             dataToRestore = data.update(dataToRestore);
           }
 
           data.restore(dataToRestore);
-
           data.save();
-
           data.reload.render();
         }
-
         data.import.reset();
       },
       cancelAction: () => { data.import.reset(); },
@@ -179,32 +177,23 @@ data.validate = {
     feedback = false
   } = {}) => {
     navigator.clipboard.readText().then(clipboardData => {
-      // is the data a JSON object
       if (isJson(clipboardData)) {
-        // is this JSON from this app
         if (JSON.parse(clipboardData)[APP_NAME] || JSON.parse(clipboardData)[APP_NAME.toLowerCase()]) {
           data.feedback.clear.render(feedback);
-
           data.feedback.success.render(feedback, 'Clipboard data', () => {
             menu.close();
-
             data.import.render(clipboardData);
           });
         } else {
           data.feedback.clear.render(feedback);
-
           data.feedback.fail.notClipboardJson.render(feedback, 'Clipboard data');
         }
       } else {
-        // not a JSON object
-
         data.feedback.clear.render(feedback);
-
         data.feedback.fail.notClipboardJson.render(feedback, 'Clipboard data');
       }
     }).catch(() => {
       data.feedback.clear.render(feedback);
-
       data.feedback.fail.notClipboardJson.render(feedback, 'Clipboard data');
     });
   },
@@ -213,58 +202,34 @@ data.validate = {
     feedback = false,
     input = false
   } = {}) => {
-    // make new file reader
     const reader = new window.FileReader();
-
-    // define the on load event for the reader
     reader.onload = (event) => {
-      // is this a JSON file
       if (isJson(event.target.result)) {
-        // is this JSON from this app
         if (JSON.parse(event.target.result)[APP_NAME] || JSON.parse(event.target.result)[APP_NAME.toLowerCase()]) {
           data.feedback.clear.render(feedback);
-
           data.feedback.success.render(feedback, fileList[0].name, () => {
             menu.close();
-
             data.import.render(event.target.result);
           });
-
           if (input) { input.value = ''; }
         } else {
           data.feedback.clear.render(feedback);
-
           data.feedback.fail.notAppJson.render(feedback, fileList[0].name);
-
           if (input) { input.value = ''; }
         }
       } else {
-        // not a JSON file
-
         data.feedback.clear.render(feedback);
-
         data.feedback.fail.notJson.render(feedback, fileList[0].name);
-
-        if (input) {
-          input.value = '';
-        }
+        if (input) { input.value = ''; }
       }
     };
-
-    // invoke the reader
     reader.readAsText(fileList.item(0));
   }
 };
 
 data.export = () => {
   let timestamp = dateTime();
-
-  const leadingZero = (value) => {
-    if (value < 10) {
-      value = '0' + value;
-    }
-    return value;
-  };
+  const leadingZero = (value) => value < 10 ? '0' + value : value;
 
   timestamp.hours = leadingZero(timestamp.hours);
   timestamp.minutes = leadingZero(timestamp.minutes);
@@ -272,22 +237,16 @@ data.export = () => {
   timestamp.date = leadingZero(timestamp.date);
   timestamp.month = leadingZero(timestamp.month + 1);
   timestamp.year = leadingZero(timestamp.year);
-  timestamp = timestamp.year + '.' + timestamp.month + '.' + timestamp.date + ' - ' + timestamp.hours + ' ' + timestamp.minutes + ' ' + timestamp.seconds;
+  timestamp = `${timestamp.year}.${timestamp.month}.${timestamp.date} - ${timestamp.hours} ${timestamp.minutes} ${timestamp.seconds}`;
 
-  const fileName = APP_NAME + ' ' + message.get('dataExportBackup') + ' - ' + timestamp + '.json';
-
+  const fileName = `${APP_NAME} ${message.get('dataExportBackup')} - ${timestamp}.json`;
   const dataToExport = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data.load()));
 
   const link = document.createElement('a');
-
   link.setAttribute('href', dataToExport);
-
   link.setAttribute('download', fileName);
-
   link.addEventListener('click', () => { link.remove(); });
-
   document.querySelector('body').appendChild(link);
-
   link.click();
 };
 
@@ -298,7 +257,6 @@ data.remove = (key) => {
 data.backup = (dataToBackup) => {
   if (dataToBackup) {
     data.set(APP_NAME + 'Backup', JSON.stringify(dataToBackup));
-
     console.log('data version ' + dataToBackup.version + ' backed up');
   }
 };
@@ -309,28 +267,23 @@ data.update = (dataToUpdate) => {
   } else {
     console.log('data version:', version.number, 'no need to run update');
   }
-
   return dataToUpdate;
 };
 
 data.restore = (dataToRestore) => {
   if (dataToRestore) {
     console.log('data found to load');
-
     if (data.import.state.setup.include) {
       state.set.restore.setup(dataToRestore);
     }
-
     if (data.import.state.theme.include) {
       state.set.restore.theme(dataToRestore);
     }
-
     if (data.import.state.bookmark.include) {
       switch (data.import.state.bookmark.type) {
         case 'restore':
           bookmark.restore(dataToRestore);
           break;
-
         case 'append':
           bookmark.append(dataToRestore);
           break;
@@ -338,7 +291,6 @@ data.restore = (dataToRestore) => {
     }
   } else {
     console.log('no data found to load');
-
     state.set.default();
   }
 };
@@ -360,26 +312,23 @@ data.load = async () => {
         return loadedData;
     } catch (error) {
         console.error("Fehler beim Laden der initialen Einstellungen:", error);
-        return {};
+        return { ...defaultSettings };
     }
 };
 
 data.wipe = {
   all: () => {
     data.remove(APP_NAME);
-
     data.reload.render();
   },
   partial: () => {
     bookmark.reset();
-
     data.set(APP_NAME, JSON.stringify({
       [APP_NAME]: true,
       version: version.number,
       state: state.get.default(),
       bookmark: bookmark.all
     }));
-
     data.reload.render();
   }
 };
@@ -448,9 +397,7 @@ data.feedback.clear = {
 data.feedback.success = {
   render: (feedback, filename, action) => {
     feedback.appendChild(node(`p:${message.get('dataFeedbackSuccess')}|class:muted small`));
-
     feedback.appendChild(node('p:' + filename));
-
     if (action) {
       data.feedback.animation.set.render(feedback, 'is-pop', action);
     }
@@ -510,6 +457,7 @@ data.feedback.animation = {
 data.init = async () => {
     const initialData = await data.load();
     if (initialData) {
+        console.log("Verwende initiale Daten zur Wiederherstellung:", initialData);
         data.restore(initialData);
     } else {
         console.warn("Keine gültigen Einstellungen gefunden, verwende Standardwerte.");
