@@ -54,30 +54,26 @@ data.getAll = async () => {
     try {
         const response = await fetch('http://10.10.0.111:3100/settings');
         
-        // Überprüfen, ob die Antwort erfolgreich ist
+        // Überprüfen Sie den Status der Antwort und den Typ der Antwort
         if (!response.ok) {
             console.warn("Fehlerhafte Antwort vom Server:", response.status);
             return {};
         }
 
         const settings = await response.json();
-        
-        // Überprüfen, ob das empfangene JSON-Objekt leer ist
-        if (Object.keys(settings).length === 0) {
-            console.warn('Leeres JSON-Objekt vom Server erhalten, Verwenden von Standardwerten.');
+
+        if (settings && typeof settings === "object" && !Array.isArray(settings)) {
+            console.log('Alle Einstellungen vom Server erhalten (gültiges JSON):', settings);
+            return settings;
+        } else {
+            console.warn('Ungültiges JSON-Format vom Server erhalten oder leeres Objekt, Verwenden von Standardwerten.');
             return {};
         }
-
-        console.log('Alle Einstellungen vom Server erhalten:', settings);
-        return settings;
     } catch (error) {
         console.error('Fehler beim Abrufen aller Einstellungen vom Server:', error);
         return {};
     }
 };
-
-
-
 
 data.import = {
   state: {
@@ -512,9 +508,9 @@ data.init = async () => {
     const settings = await data.getAll();
     console.log("Initiale Einstellungen geladen:", settings);
 
-    // Falls `settings` leer ist, Standardwerte verwenden
-    if (Object.keys(settings).length === 0) {
-        console.warn("Keine Einstellungen gefunden, verwende Standardwerte.");
+    // Falls `settings` leer ist oder kein gültiges Objekt, Standardwerte verwenden
+    if (!settings || Object.keys(settings).length === 0) {
+        console.warn("Keine gültigen Einstellungen gefunden, verwende Standardwerte.");
         data.restore(data.load());
     } else {
         data.restore(settings);
