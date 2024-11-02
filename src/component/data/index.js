@@ -23,7 +23,7 @@ data.set = async (key, value) => {
         console.log(`Speichern der Einstellung auf dem Server: ${key} = ${value}`);
         const currentSettings = await data.getAll();
         currentSettings[key] = value;
-        const response = await fetch('http://nighttab:3100/settings', {
+        const response = await fetch('http://10.10.0.111:3100/settings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(currentSettings),
@@ -52,7 +52,7 @@ data.get = async (key) => {
 
 data.getAll = async () => {
     try {
-        const response = await fetch('http://nighttab:3100/settings');
+        const response = await fetch('http://10.10.0.111:3100/settings');
         
         if (!response.ok) {
             throw new Error(`Serverfehler beim Abrufen: ${response.statusText}`);
