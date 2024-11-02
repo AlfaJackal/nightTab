@@ -26,7 +26,7 @@ data.set = async (key, value) => {
         currentSettings[key] = value;
 
         // POST-Anfrage an die API, um die Daten zu speichern
-        await fetch('http://localhost:3100/settings', {
+        await fetch('http://10.10.0.111:3100/settings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(currentSettings),
@@ -52,7 +52,7 @@ data.get = async (key) => {
 // Alle Einstellungen vom Server abrufen
 data.getAll = async () => {
     try {
-        const response = await fetch('http://localhost:3100/settings');
+        const response = await fetch('http://10.10.0.111:3100/settings');
         const settings = await response.json();
         console.log('Alle Einstellungen vom Server erhalten:', settings);
         return settings;
