@@ -54,7 +54,7 @@ data.getAll = async () => {
     try {
         const response = await fetch('http://10.10.0.111:3100/settings');
         const settings = await response.json();
-        console.log('Alle Einstellungen vom Server erhalten:', settings);
+        console.log('Alle Einstellungen vom Server erhalten:', settings); // Überprüfen Sie, ob dies ein JSON-Objekt ist
         return settings;
     } catch (error) {
         console.error('Fehler beim Abrufen aller Einstellungen vom Server:', error);
@@ -493,8 +493,17 @@ data.feedback.animation = {
   }
 };
 
-data.init = () => {
-  data.restore(data.load());
+data.init = async () => {
+    const settings = await data.getAll();
+    console.log("Initiale Einstellungen geladen:", settings);
+
+    // Überprüfen Sie, ob `settings` gültige Daten enthält, bevor `data.restore()` aufgerufen wird
+    if (settings && Object.keys(settings).length > 0) {
+        data.restore(settings);
+    } else {
+        console.warn("Keine Einstellungen gefunden, verwende Standardwerte.");
+        data.restore(data.load());
+    }
 };
 
 export { data };
