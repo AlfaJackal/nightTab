@@ -18,8 +18,6 @@ import { clearChildNode } from '../../utility/clearChildNode';
 
 const data = {};
 
-const data = {};
-
 // Speichern der Daten auf dem Server (via API)
 data.set = async (key, value) => {
     try {
