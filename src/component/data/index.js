@@ -41,8 +41,14 @@ data.set = async (key, value) => {
 data.get = async (key) => {
     try {
         const settings = await data.getAll();
-        console.log(`Einstellung vom Server erhalten: ${key} = ${settings[key]}`);
-        return settings[key] || null;
+        
+        if (settings && typeof settings === "object") {
+            console.log(`Einstellung vom Server erhalten: ${key} = ${settings[key]}`);
+            return settings[key] || null;
+        } else {
+            console.warn("Leere oder ungültige Einstellungen erhalten, Standardwert zurückgeben.");
+            return null;
+        }
     } catch (error) {
         console.error('Fehler beim Laden der Einstellungen vom Server:', error);
         return null;
@@ -54,19 +60,19 @@ data.getAll = async () => {
     try {
         const response = await fetch('http://10.10.0.111:3100/settings');
         
-        // Überprüfen Sie den Status der Antwort und den Typ der Antwort
         if (!response.ok) {
             console.warn("Fehlerhafte Antwort vom Server:", response.status);
             return {};
         }
 
         const settings = await response.json();
-
+        
+        // Sicherstellen, dass die Antwort ein gültiges Objekt ist
         if (settings && typeof settings === "object" && !Array.isArray(settings)) {
             console.log('Alle Einstellungen vom Server erhalten (gültiges JSON):', settings);
             return settings;
         } else {
-            console.warn('Ungültiges JSON-Format vom Server erhalten oder leeres Objekt, Verwenden von Standardwerten.');
+            console.warn("Ungültige JSON-Struktur erhalten, Rückgabe eines leeren Objekts.");
             return {};
         }
     } catch (error) {
