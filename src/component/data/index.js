@@ -54,35 +54,32 @@ data.get = async (key) => {
     try {
         const settings = await data.getAll();
         console.log(`Einstellung vom Server erhalten: ${key} = ${settings[key]}`);
-        return settings[key] || defaultSettings[key] || null;
+        return settings[key] || null;
     } catch (error) {
         console.error('Fehler beim Laden der Einstellungen vom Server:', error);
-        return defaultSettings[key] || null;
+        return null;
     }
 };
 
-// Alle Einstellungen vom Server abrufen und mit Standardwerten kombinieren
+// Alle Einstellungen vom Server abrufen
 data.getAll = async () => {
     try {
         const response = await fetch('http://10.10.0.111:3100/settings');
         
         if (!response.ok) {
             console.warn("Fehlerhafte Antwort vom Server:", response.status);
-            return { ...defaultSettings };
+            return {};
         }
 
         const settings = await response.json();
 
-        if (settings && typeof settings === "object" && !Array.isArray(settings)) {
-            console.log('Alle Einstellungen vom Server erhalten (gültiges JSON):', settings);
-            return { ...defaultSettings, ...settings };
-        } else {
-            console.warn("Ungültige JSON-Struktur erhalten, Rückgabe der Standardwerte.");
-            return { ...defaultSettings };
-        }
+        // Sicherstellen, dass alle erforderlichen Felder existieren
+        console.log('Erhaltene Einstellungen:', settings);
+        
+        return settings;
     } catch (error) {
         console.error('Fehler beim Abrufen aller Einstellungen vom Server:', error);
-        return { ...defaultSettings };
+        return {};
     }
 };
 
@@ -304,15 +301,23 @@ data.save = () => {
   }));
 };
 
-// Prüfen Sie, ob `data.load()` korrekt aufgelöst wird und keine Promise als JSON verarbeitet
+// Daten laden und sicherstellen, dass sie korrekt sind
 data.load = async () => {
     try {
         const loadedData = await data.getAll();
         console.log("Initiale Einstellungen geladen:", loadedData);
+
+        // Überprüfen, ob `style` und `language` wirklich vorhanden sind
+        if (!loadedData.style || !loadedData.language) {
+            console.warn("Einstellungen fehlen Felder, die erforderlich sind. Verwenden der Standardwerte.");
+            loadedData.style = loadedData.style || {};
+            loadedData.language = loadedData.language || 'en'; // Füge die Sprache hinzu, falls sie fehlt
+        }
+        
         return loadedData;
     } catch (error) {
         console.error("Fehler beim Laden der initialen Einstellungen:", error);
-        return { ...defaultSettings };
+        return { style: {}, language: 'en' };
     }
 };
 
@@ -453,7 +458,7 @@ data.feedback.animation = {
   }
 };
 
-// Stellen Sie sicher, dass data.init() nur auf aufgelöste Daten zugreift
+// Initialize and use data.restore if valid settings are loaded
 data.init = async () => {
     const initialData = await data.load();
     if (initialData) {
