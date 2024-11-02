@@ -18,52 +18,15 @@ import { clearChildNode } from '../../utility/clearChildNode';
 
 const data = {};
 
-data.set = async (key, value) => {
-    try {
-        console.log(`Speichern der Einstellung auf dem Server: ${key} = ${value}`);
-        const currentSettings = await data.getAll();
-        currentSettings[key] = value;
-        const response = await fetch('http://10.10.0.111:3100/settings', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(currentSettings),
-        });
-
-        if (!response.ok) {
-            throw new Error(`Serverfehler beim Speichern: ${response.statusText}`);
-        }
-
-        console.log('Einstellungen wurden in settings.json gespeichert.');
-    } catch (error) {
-        console.error('Fehler beim Speichern der Einstellungen:', error);
-    }
+data.set = (key, value) => {
+    console.log(`Speichern der Einstellung in localStorage: ${key} = ${value}`);
+    window.localStorage.setItem(key, JSON.stringify(value));
 };
 
-data.get = async (key) => {
-    try {
-        const settings = await data.getAll();
-        console.log(`Einstellung vom Server erhalten: ${key} = ${settings[key]}`);
-        return settings[key] || null;
-    } catch (error) {
-        console.error('Fehler beim Laden der Einstellungen:', error);
-        return null;
-    }
-};
-
-data.getAll = async () => {
-    try {
-        const response = await fetch('http://10.10.0.111:3100/settings');
-        
-        if (!response.ok) {
-            throw new Error(`Serverfehler beim Abrufen: ${response.statusText}`);
-        }
-
-        const settings = await response.json();
-        return settings;
-    } catch (error) {
-        console.error('Fehler beim Abrufen aller Einstellungen:', error);
-        return {};
-    }
+data.get = (key) => {
+    const value = JSON.parse(window.localStorage.getItem(key));
+    console.log(`Laden der Einstellung von localStorage: ${key} = ${value}`);
+    return value;
 };
 
 
