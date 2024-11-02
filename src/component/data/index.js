@@ -22,6 +22,8 @@ const data = {};
 data.set = async (key, value) => {
     try {
         console.log(`Speichern der Einstellung auf dem Server: ${key} = ${value}`);
+        
+        // Abrufen der aktuellen Einstellungen
         const currentSettings = await data.getAll();
         currentSettings[key] = value;
 
@@ -31,9 +33,23 @@ data.set = async (key, value) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(currentSettings),
         });
+
         console.log('Einstellungen wurden in settings.json auf dem Server gespeichert.');
     } catch (error) {
         console.error('Fehler beim Speichern der Einstellungen auf dem Server:', error);
+    }
+};
+
+// Laden einer spezifischen Einstellung vom Server (via API)
+data.get = async (key) => {
+    try {
+        // Abrufen aller Einstellungen und sicherstellen, dass es kein Promise ist
+        const settings = await data.getAll();
+        console.log(`Einstellung vom Server erhalten: ${key} = ${settings[key]}`);
+        return settings[key] || null;
+    } catch (error) {
+        console.error('Fehler beim Laden der Einstellungen vom Server:', error);
+        return null;
     }
 };
 
@@ -42,13 +58,15 @@ data.getAll = async () => {
     try {
         const response = await fetch('http://10.10.0.111:3100/settings');
         
+        // Prüfen, ob die Antwort erfolgreich ist
         if (!response.ok) {
             console.warn("Fehlerhafte Antwort vom Server:", response.status);
             return {};
         }
 
+        // JSON-Antwort abrufen und sicherstellen, dass sie kein Promise ist
         const settings = await response.json();
-        
+
         // Sicherstellen, dass die Antwort ein gültiges Objekt ist
         if (settings && typeof settings === "object" && !Array.isArray(settings)) {
             console.log('Alle Einstellungen vom Server erhalten (gültiges JSON):', settings);
@@ -62,25 +80,6 @@ data.getAll = async () => {
         return {};
     }
 };
-
-// Laden einer spezifischen Einstellung vom Server (via API)
-data.get = async (key) => {
-    try {
-        const settings = await data.getAll();
-        
-        if (settings && typeof settings === "object") {
-            console.log(`Einstellung vom Server erhalten: ${key} = ${settings[key]}`);
-            return settings[key] || null;
-        } else {
-            console.warn("Leere oder ungültige Einstellungen erhalten, Standardwert zurückgeben.");
-            return null;
-        }
-    } catch (error) {
-        console.error('Fehler beim Laden der Einstellungen vom Server:', error);
-        return null;
-    }
-};
-
 
 data.import = {
   state: {
@@ -353,20 +352,16 @@ data.save = () => {
   }));
 };
 
-data.load = () => {
-  if (data.get(APP_NAME) !== null && data.get(APP_NAME) !== undefined) {
-    let dataToLoad = JSON.parse(data.get(APP_NAME));
-
-    if (dataToLoad.version !== version.number) {
-      data.backup(dataToLoad);
-
-      dataToLoad = data.update(dataToLoad);
+// Prüfen Sie, ob `data.load()` korrekt aufgelöst wird und keine Promise als JSON verarbeitet
+data.load = async () => {
+    try {
+        const loadedData = await data.getAll();
+        console.log("Initiale Einstellungen geladen:", loadedData);
+        return loadedData;
+    } catch (error) {
+        console.error("Fehler beim Laden der initialen Einstellungen:", error);
+        return {};
     }
-
-    return dataToLoad;
-  } else {
-    return false;
-  }
 };
 
 data.wipe = {
@@ -511,16 +506,14 @@ data.feedback.animation = {
   }
 };
 
+// Stellen Sie sicher, dass data.init() nur auf aufgelöste Daten zugreift
 data.init = async () => {
-    const settings = await data.getAll();
-    console.log("Initiale Einstellungen geladen:", settings);
-
-    // Falls `settings` leer ist oder kein gültiges Objekt, Standardwerte verwenden
-    if (!settings || Object.keys(settings).length === 0) {
-        console.warn("Keine gültigen Einstellungen gefunden, verwende Standardwerte.");
-        data.restore(data.load());
+    const initialData = await data.load();
+    if (initialData) {
+        data.restore(initialData);
     } else {
-        data.restore(settings);
+        console.warn("Keine gültigen Einstellungen gefunden, verwende Standardwerte.");
+        state.set.default();
     }
 };
 
