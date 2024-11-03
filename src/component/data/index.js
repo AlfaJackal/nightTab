@@ -18,6 +18,7 @@ import { clearChildNode } from '../../utility/clearChildNode';
 
 const data = {};
 
+// Data save
 data.set = (key, data) => {
   window.localStorage.setItem(key, data);
 };
