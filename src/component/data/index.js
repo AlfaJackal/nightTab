@@ -344,9 +344,11 @@ data.save = () => {
   }));
 };
 
-data.load = () => {
-  if (data.get(APP_NAME) !== null && data.get(APP_NAME) !== undefined) {
-    let dataToLoad = JSON.parse(data.get(APP_NAME));
+data.load = async () => {  // async hinzufügen
+  const storedData = await data.get(APP_NAME);  // await hinzufügen
+
+  if (storedData !== null && storedData !== undefined) {
+    let dataToLoad = JSON.parse(storedData);  // JSON.parse wird nur auf das Ergebnis angewendet, nicht auf ein Promise
 
     if (dataToLoad.version !== version.number) {
       data.backup(dataToLoad);
@@ -359,6 +361,7 @@ data.load = () => {
     return false;
   }
 };
+
 
 data.wipe = {
   all: () => {
