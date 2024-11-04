@@ -349,18 +349,26 @@ data.load = async () => {
 
   if (storedData !== null && storedData !== undefined) {
     let dataToLoad = JSON.parse(storedData);
-    console.log("Geladene Daten:", dataToLoad);  // Debug-Ausgabe, um die Datenstruktur zu überprüfen
+    console.log("Komplette geladene Daten:", dataToLoad);  // Debug-Ausgabe
 
     if (dataToLoad.version !== version.number) {
       data.backup(dataToLoad);
       dataToLoad = data.update(dataToLoad);
     }
 
+    // Sicherstellen, dass 'language' und andere wichtige Eigenschaften vorhanden sind
+    if (!dataToLoad.language) {
+      dataToLoad.language = "en";  // Standardwert für Sprache setzen, falls nicht vorhanden
+      console.log("Standardwert für Sprache gesetzt:", dataToLoad.language);
+    }
+
     return dataToLoad;
   } else {
+    console.log("Keine Daten zum Laden gefunden.");
     return false;
   }
 };
+
 
 
 
