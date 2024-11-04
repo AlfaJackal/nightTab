@@ -274,12 +274,14 @@ theme.accent.cycle = {
 theme.style = {
   bind: () => {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', async () => {
+      console.log("Systemfarbschema hat sich geändert.");
       await theme.style.initial();
     });
   },
   initial: async () => {
     try {
       let style = await data.get('themeStyle'); // Stil vom Server abrufen
+      console.log("Stil vom Server abgerufen:", style);
 
       if (!style) {
         // Falls kein Stil auf dem Server gespeichert ist, den Systemstil setzen
@@ -288,26 +290,31 @@ theme.style = {
         } else {
           style = 'light';
         }
+        console.log("Kein Stil gefunden, setze Standardstil:", style);
         await data.set('themeStyle', style); // Stil auf dem Server speichern
       }
 
       state.get.current().theme.style = style;
+      console.log("Aktueller Stil im Zustand gesetzt:", state.get.current().theme.style);
 
     } catch (error) {
       console.error('Fehler beim Abrufen oder Speichern des Themas:', error);
     }
   },
   dark: async () => {
+    console.log("Stil auf 'dark' setzen");
     state.get.current().theme.style = 'dark';
     await data.set('themeStyle', 'dark'); // "dark"-Stil auf dem Server speichern
     applyCSSClass('theme.style');
   },
   light: async () => {
+    console.log("Stil auf 'light' setzen");
     state.get.current().theme.style = 'light';
     await data.set('themeStyle', 'light'); // "light"-Stil auf dem Server speichern
     applyCSSClass('theme.style');
   },
   toggle: async () => {
+    console.log("Stil umschalten");
     if (state.get.current().theme.style === 'dark') {
       await theme.style.light();
     } else {
@@ -315,6 +322,7 @@ theme.style = {
     }
   }
 };
+
 
 theme.background = {
   element: {
