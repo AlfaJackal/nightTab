@@ -2,8 +2,10 @@ import { data } from './components/data'; // Sicherstellen, dass data.js importi
 
 // Initialisieren des Hintergrundes basierend auf der serverseitigen Einstellung
 async function initializeBackground() {
+  console.log("initializeBackground wird aufgerufen");  // Debug-Ausgabe
   try {
-    const nightTabStyle = await data.get('nightTabStyle'); // `nightTabStyle` vom Server abrufen
+    const nightTabStyle = await data.get('themeStyle'); // Stil vom Server abrufen
+    console.log('Hintergrundstil vom Server:', nightTabStyle);
 
     if (nightTabStyle) {
       const style = document.createElement('style');
