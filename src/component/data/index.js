@@ -344,15 +344,15 @@ data.save = () => {
   }));
 };
 
-data.load = async () => {  // async hinzufügen
-  const storedData = await data.get(APP_NAME);  // await hinzufügen
+data.load = async () => {  
+  const storedData = await data.get(APP_NAME);  
 
   if (storedData !== null && storedData !== undefined) {
-    let dataToLoad = JSON.parse(storedData);  // JSON.parse wird nur auf das Ergebnis angewendet, nicht auf ein Promise
+    let dataToLoad = JSON.parse(storedData);
+    console.log("Geladene Daten:", dataToLoad);  // Debug-Ausgabe, um die Datenstruktur zu überprüfen
 
     if (dataToLoad.version !== version.number) {
       data.backup(dataToLoad);
-
       dataToLoad = data.update(dataToLoad);
     }
 
@@ -361,6 +361,7 @@ data.load = async () => {  // async hinzufügen
     return false;
   }
 };
+
 
 
 data.wipe = {
