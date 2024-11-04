@@ -18,6 +18,8 @@ import { applyCSSVar } from '../../utility/applyCSSVar';
 import { applyCSSClass } from '../../utility/applyCSSClass';
 import { applyCSSState } from '../../utility/applyCSSState';
 
+import { data } from '../data';
+
 import WebFont from 'webfontloader';
 
 import './index.css';
@@ -271,51 +273,45 @@ theme.accent.cycle = {
 
 theme.style = {
   bind: () => {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-      theme.style.initial();
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', async () => {
+      await theme.style.initial();
     });
   },
-  initial: () => {
-    switch (state.get.current().theme.style) {
+  initial: async () => {
+    try {
+      let style = await data.get('themeStyle'); // Stil vom Server abrufen
 
-      case 'dark':
-      case 'light':
-
-        localStorage.setItem(APP_NAME + 'Style', state.get.current().theme.style);
-        break;
-
-      case 'system':
-
-        if (window.matchMedia('(prefers-color-scheme:dark)').matches) {
-          localStorage.setItem(APP_NAME + 'Style', 'dark');
-        } else if (window.matchMedia('(prefers-color-scheme:light)').matches) {
-          localStorage.setItem(APP_NAME + 'Style', 'light');
+      if (!style) {
+        // Falls kein Stil auf dem Server gespeichert ist, den Systemstil setzen
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          style = 'dark';
+        } else {
+          style = 'light';
         }
-        break;
+        await data.set('themeStyle', style); // Stil auf dem Server speichern
+      }
 
+      state.get.current().theme.style = style;
+
+    } catch (error) {
+      console.error('Fehler beim Abrufen oder Speichern des Themas:', error);
     }
   },
-  dark: () => {
+  dark: async () => {
     state.get.current().theme.style = 'dark';
-    theme.style.initial();
+    await data.set('themeStyle', 'dark'); // "dark"-Stil auf dem Server speichern
     applyCSSClass('theme.style');
   },
-  light: () => {
+  light: async () => {
     state.get.current().theme.style = 'light';
-    theme.style.initial();
+    await data.set('themeStyle', 'light'); // "light"-Stil auf dem Server speichern
     applyCSSClass('theme.style');
   },
-  toggle: () => {
-    switch (state.get.current().theme.style) {
-
-      case 'dark':
-        theme.style.light();
-        break;
-
-      case 'light':
-        theme.style.dark();
-        break;
-
+  toggle: async () => {
+    if (state.get.current().theme.style === 'dark') {
+      await theme.style.light();
+    } else {
+      await theme.style.dark();
     }
   }
 };

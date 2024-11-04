@@ -1,15 +1,28 @@
-// inital check for systems which do not have light or dark mode
-if (localStorage.getItem('nightTabStyle')) {
-  const style = document.createElement('style');
-  style.type = 'text/css';
-  style.media = 'screen';
-  switch (localStorage.getItem('nightTabStyle')) {
-    case 'light':
-      style.innerHTML = 'html, body {background-color: rgb(255, 255, 255);}';
-      break;
-    case 'dark':
-      style.innerHTML = 'html, body {background-color: rgb(0, 0, 0);}';
-      break;
+import { data } from './components/data'; // Sicherstellen, dass data.js importiert ist
+
+// Initialisieren des Hintergrundes basierend auf der serverseitigen Einstellung
+async function initializeBackground() {
+  try {
+    const nightTabStyle = await data.get('nightTabStyle'); // `nightTabStyle` vom Server abrufen
+
+    if (nightTabStyle) {
+      const style = document.createElement('style');
+      style.type = 'text/css';
+      style.media = 'screen';
+
+      switch (nightTabStyle) {
+        case 'light':
+          style.innerHTML = 'html, body {background-color: rgb(255, 255, 255);}';
+          break;
+        case 'dark':
+          style.innerHTML = 'html, body {background-color: rgb(0, 0, 0);}';
+          break;
+      }
+      document.querySelector('head').appendChild(style);
+    }
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Hintergrund-Einstellungen:', error);
   }
-  document.querySelector('head').appendChild(style);
 }
+
+initializeBackground();
